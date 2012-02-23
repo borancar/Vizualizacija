@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+
+    <description>
+      Vizualizacija logickih izraza
+    </description>
+    <display-name>Vizualizacija</display-name>
+
+    <servlet>
+        <servlet-name>servletPrikaz</servlet-name>
+        <servlet-class>hr.fer.zemris.java.tim5.projekt.HmmServlet</servlet-class>
+        <init-param>
+			<param-name>std-log-notacija-symbolSize</param-name>
+			<param-value>28</param-value>
+		</init-param>
+		<init-param>
+			<param-name>mat-log-notacija-symbolSize</param-name>
+			<param-value>24</param-value>
+		</init-param>
+		<init-param>
+			<param-name>logicki-sklopovi-symbolSize</param-name>
+			<param-value>60</param-value>
+		</init-param>
+		<init-param>
+			<param-name>maxVarijabli</param-name>
+			<param-value>0</param-value>
+		</init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>servletPrikaz</servlet-name>
+        <url-pattern>/prikazi</url-pattern>
+    </servlet-mapping>
+
+</web-app>

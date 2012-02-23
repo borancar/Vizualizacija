@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="vizualizacija" basedir="." default="package">
+	
+	<property name="app.name" value="vizualizacija"/>	
+	<property name="config.dir" value="configuration"/>
+	<property name="build.dir" value="build"/>
+	<property name="lib.dir" value="lib"/>
+	<property name="jlib.dir" value="jlib"/>
+	<property name="src.tests" value="tests"/>
+	
+	<property file="configuration/tomcat.properties"/>
+	
+	<path id="src.class.path">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar"/>
+		</fileset>
+		<fileset dir="${jlib.dir}">
+			<include name="*.jar"/>
+		</fileset>
+		<pathelement path="${build.dir}/web"/>
+	</path>
+
+	<path id="test.class.path">
+		<path refid="src.class.path"/>
+		<pathelement path="${build.dir}/tests"/>
+		<pathelement path="${build.dir}/web"/>
+	</path>
+	
+	<target name="init">
+		<available file="${lib.dir}/junit.jar" property="junit.jar.present"/>
+		<fail unless="junit.jar.present">
+			"${lib.dir}/junit.jar" file is not present.
+		</fail>
+		
+		<available file="${lib.dir}/servlet-api.jar" property="servlet-api.jar.present"/>
+		<fail unless="servlet-api.jar.present">
+			"${lib.dir}/servlet-api.jar" file is not present. You can copy it from $CATALINA_HOME/common/lib/servlet-api.jar.
+		</fail>
+
+		<tstamp/>
+
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${build.dir}/web"/>
+		<mkdir dir="${build.dir}/tests"/>
+		<mkdir dir="${jlib.dir}"/>
+	</target>
+
+	<target name="clean">
+		<delete includeEmptyDirs="true">
+			<fileset dir="${build.dir}"/>
+			<fileset dir="${jlib.dir}"/>
+		</delete>
+	</target>
+
+	<target name="compile-web" depends="init">
+		<javac destdir="${build.dir}/web" includes="**/*.java" includeAntRuntime="false" debug="true" debuglevel="lines,vars,source" encoding="UTF-8">
+			<src path="src"/>
+			<classpath refid="src.class.path"/>
+		</javac>
+	</target>
+
+	<target name="package-web" depends="compile-web, run-tests">
+		<jar destfile="${jlib.dir}/${app.name}.jar">
+			<fileset dir="${build.dir}/web" includes="**/*.class"/>
+		</jar>
+	</target>
+
+	<target name="compile-tests" depends="compile-web">
+		<javac destdir="${build.dir}/tests" includes="**/*.java" includeAntRuntime="false" debug="true" debuglevel="lines,vars,source" encoding="UTF-8">
+			<src path="tests"/>
+			<classpath refid="src.class.path"/>
+		</javac>
+	</target>
+
+	<target name="compile" depends="compile-web, compile-tests"/>
+
+	<target name="package" depends="package-web"/>
+
+	<!--
+	Da bi ovi testovi radili, potrebno je iskopirati junit-4.1.jar u direktorij
+	[Eclipse]\plugins\org.apache.ant_1.6.5\lib i promijeniti mu ime u junit.jar.
+	Zatim je potreno ga dodati preko Eclipsea na način
+	Window->Preferences->Ant->Runtime->Ant Home entries pa onda kliknuti na
+	Add External JAR i dodati junit.jar
+	-->
+	<target name="run-tests" depends="compile-web, compile-tests" if="junit.jar.present">
+		<junit fork="yes" printsummary="withOutAndErr" forkmode="once">
+			<classpath refid="test.class.path"/>
+			
+			<formatter type="plain" usefile="false" />
+			
+			<test name="hr.fer.zemris.java.tim5.projekt.test.TokenizerTest"/>
+			<test name="hr.fer.zemris.java.tim5.projekt.test.InfixParserTest"/>
+			<test name="hr.fer.zemris.java.tim5.projekt.test.PrefixParserTest"/>
+		</junit>
+	</target>
+
+	<target name="war" depends="package">
+		<mkdir dir="${build.dir}/configuration"/>
+
+		<war destfile="${build.dir}/${app.name}.war" webxml="${config.dir}/web.xml">
+			<lib dir="${lib.dir}" includes="**" excludes="servlet-api.jar, junit-4.1.jar"/>
+			<lib dir="${jlib.dir}" includes="**"/>
+			<classes dir="${build.dir}/configuration" includes="**"/>
+			<webinf dir="web/private" includes="**"/>
+			<fileset dir="web/public" includes="**"/>
+		</war>
+	</target>
+
+	<target name="shutdownTomcat">
+		<fail unless="tomcat.dir">
+			Tomcat directory is not set!
+		</fail>
+		<echo>Pokrecem postupak zaustavljanja Tomcata...</echo>
+		<exec dir="${tomcat.dir}/bin" executable="cmd.exe">
+		  <arg line="/c shutdown.bat"/>
+		</exec>
+	</target>
+
+	<target name="startupTomcat">
+		<fail unless="tomcat.dir">
+			Tomcat directory is not set!
+		</fail>
+		<echo>Pokrecem postupak startanja Tomcata...</echo>
+		<exec dir="${tomcat.dir}/bin" executable="cmd.exe" spawn="true">
+		  <arg line="/c startup.bat"/>
+		</exec>
+	</target>
+
+	<target name="copyToTomcat" depends="war">
+		<fail unless="tomcat.dir">
+			Tomcat directory is not set!
+		</fail>
+		<delete includeEmptyDirs="true" failonerror="false">
+			<fileset dir="${tomcat.dir}/webapps/${app.name}"/>
+		</delete>
+		<copy file="${build.dir}/${app.name}.war" todir="${tomcat.dir}/webapps"/>
+	</target>
+</project>
