@@ -3,6 +3,7 @@ build/*
 jlib/
 lib/
 doc/
+target/
 .classpath
 .project
 .settings/
