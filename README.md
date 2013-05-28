@@ -10,8 +10,8 @@ of 5 students:
 - Igor Belša
 - Boran Car
 - Jurica Cerovec
-- Ivan Krišto
 - Robert Fitoš
+- Ivan Krišto
 
 Demonstration
 -------------
