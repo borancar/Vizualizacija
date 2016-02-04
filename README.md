@@ -18,3 +18,8 @@ Demonstration
 
 There is an online version running at 
 [Heroku](http://vizualizacija.herokuapp.com/)
+
+Screenshots
+-----------
+
+![A AND NOT B](https://raw.githubusercontent.com/borancar/Vizualizacija/master/screenshot.png "A AND NOT B")
